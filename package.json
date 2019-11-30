@@ -1,0 +1,17 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "electron_entry.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . Minesweeper --all --out=dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Robert Seidler",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^7.1.2",
+    "electron-packager": "^14.1.1"
+  }
+}

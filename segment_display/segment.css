@@ -1,0 +1,105 @@
+seven-segment-digit {
+  display: inline-block;
+  width: 10px;
+  height: 20px;
+  margin-right: -2px;
+  padding:0px;
+}
+
+.seven-segment {
+  position: relative;
+  display: inline-block;
+  --color: green;
+  width: 9px;
+  height: 18px;
+  transform: scale(0.1)translate(-35px, -70px);
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.seven-segment .a {
+  position: absolute;
+  left: 5px;
+  height: 0;
+  width: 50px;
+  border-top: 15px solid var(--color);
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+}
+
+.seven-segment .b {
+  position: absolute;
+  left: 75px;
+  top: 5px;
+  height: 50px;
+  width: 0;
+  border-right: 15px solid var(--color);
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+}
+
+.seven-segment .c {
+  position: absolute;
+  left: 75px;
+  top: 90px;
+  height: 50px;
+  width: 0;
+  border-right: 15px solid var(--color);
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+}
+
+.seven-segment .d {
+  position: absolute;
+  top: 160px;
+  left: 5px;
+  height: 0;
+  width: 50px;
+  border-bottom: 15px solid var(--color);
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+}
+
+.seven-segment .e {
+  position: absolute;
+  left: 0;
+  top: 90px;
+  height: 50px;
+  width: 0;
+  border-left: 15px solid var(--color);
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+}
+
+.seven-segment .f {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  height: 50px;
+  width: 0;
+  border-left: 15px solid var(--color);
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+}
+
+.seven-segment .g {
+  position: absolute;
+  top: 80px;
+  left: 5px;
+}
+
+.g .bottom {
+height: 0;
+width: 65px;
+border-top: 7.5px solid var(--color);
+border-left: 7.5px solid transparent;
+border-right: 7.5px solid transparent;
+}
+
+.g .top {
+height: 0;
+width: 65px;
+border-bottom: 7.5px solid var(--color);
+border-left: 7.5px solid transparent;
+border-right: 7.5px solid transparent;
+}

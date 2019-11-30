@@ -32,13 +32,32 @@ function forEachAdjecent(xPos, yPos, xMax, yMax, fn){
 class MineSweeper extends HTMLElement {
   constructor(){
     super();
+
+    this.elements = {
+      field: [],
+      overlayMessage: document.createElement('div'),
+      xInput: document.createElement('input'),
+      yInput: document.createElement('input'),
+      minesInput: document.createElement('input'),
+      segmentDisplays: [
+        document.createElement('seven-segment-digit'), 
+        document.createElement('seven-segment-digit'), 
+        document.createElement('seven-segment-digit')
+      ],
+      timeSegmentDisplays: [
+        document.createElement('seven-segment-digit'), 
+        document.createElement('seven-segment-digit'), 
+        document.createElement('seven-segment-digit')
+      ],
+    }
+
     this.marginNoOverflow = '--margin-left: calc( -1 * calc(var(--y-length) * 2rem + (var(--y-length) + 1) * 1px) /2);';
     this.marginOverflow = '--margin-left: 0px; left: 0px;';
   }
 
   calculateSurroundingBombs(xPos, yPos){
     let surroundingBombs = 0;
-    forEachAdjecent(xPos, yPos, this.xLength, this.yLength, (x, y) => (surroundingBombs += this.field[x][y].bomb ? 1 : 0));
+    forEachAdjecent(xPos, yPos, this.xLength, this.yLength, (x, y) => (surroundingBombs += this.elements.field[x][y].bomb ? 1 : 0));
     return surroundingBombs;
   }
 
@@ -49,8 +68,8 @@ class MineSweeper extends HTMLElement {
         let xMinePos = Math.floor(Math.random() * this.xLength);
         let yMinePos = Math.floor(Math.random() * this.yLength);
 
-        if(!(xPosClicked == xMinePos && yPosClicked == yMinePos) && this.field[xMinePos][yMinePos].bomb != 'x') {
-          this.field[xMinePos][yMinePos].bomb = 'x'
+        if(!(xPosClicked == xMinePos && yPosClicked == yMinePos) && this.elements.field[xMinePos][yMinePos].bomb != 'x') {
+          this.elements.field[xMinePos][yMinePos].bomb = '&#9728;'
           minePlaced = true;
         }
       }
@@ -60,10 +79,11 @@ class MineSweeper extends HTMLElement {
   checkAdjecentForZero(xPos, yPos){
     let adjecentSpaces = []
     forEachAdjecent(xPos, yPos, this.xLength, this.yLength, (x, y) => {
-      if(!this.field[x][y].classList.contains('pressed')){
-        this.field[x][y].classList.add('pressed');
+      if(!this.elements.field[x][y].classList.contains('pressed')){
+        this.elements.field[x][y].classList.add('pressed');
+        this.elements.field[x][y].pressed = true;
         let surroundingBombs = this.calculateSurroundingBombs(x, y);
-        this.field[x][y].innerHTML = `<span>${surroundingBombs}</span>`;
+        this.elements.field[x][y].innerHTML = `<span class="adj-${surroundingBombs}">${surroundingBombs === 0 ? ' ' : surroundingBombs}</span>`;
         if(surroundingBombs == 0){
           adjecentSpaces.push(() => this.checkAdjecentForZero(x, y));
         }
@@ -77,55 +97,66 @@ class MineSweeper extends HTMLElement {
   checkVictory(){
     let victory = true;
 
-    this.field.forEach((columns, xPos) => columns.forEach((field, yPos) => {
+    this.elements.field.forEach((columns, xPos) => columns.forEach((field, yPos) => {
       if(!field.bomb && field.flag) victory = false;
-      if(field.bomb && !field.flag) victory = false;
+      if(field.bomb && field.pressed) victory = false;
+      if(!field.bomb && !field.pressed) victory = false;
     }));
 
     return victory;
   }
 
   gameOver(won){
-    let overlayMessage = this.overlayMessage = document.createElement('div');
-    overlayMessage.className = `overlay ${won ? 'won' : 'lost'}`;
-    overlayMessage.innerHTML = won ? 'won' : 'lost';
-    overlayMessage.addEventListener('dblclick', (event) => { this.resetGame(); });
-    this.append(overlayMessage);
+    this.elements.overlayMessage.className = `overlay ${won ? 'won' : 'lost'}`;
+    this.elements.overlayMessage.innerHTML = won ? 'won' : 'lost';
+    this.elements.overlayMessage.addEventListener('dblclick', (event) => { this.resetGame(); });
+    clearInterval(this.timePassedInterval);
+    this.append(this.elements.overlayMessage);
   }
 
   hitBomb(){
-    this.field.forEach((col, xPos) => col.forEach((field, yPos) => {
+    this.elements.field.forEach((col, xPos) => col.forEach((field, yPos) => {
       let suroundingBombs = this.calculateSurroundingBombs(xPos, yPos);
       field.pressed = true;
       field.classList.add('pressed');
-      field.innerHTML = field.bomb ? `<span style="color: red;">${field.bomb}</span>` : `<span>${suroundingBombs}</span>`;
+      field.innerHTML = field.bomb ? `<span style="color: black;">${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? ' ' : suroundingBombs}</span>`;
     }));
     this.gameOver(false);
   }
 
   createControlUI(){
-    let controlls = document.createElement('div');
+    let controls = document.createElement('div');
     let resetBtn = document.createElement('button');
-    let xInput = this.xInput = document.createElement('input');
-    let yInput = this.yInput = document.createElement('input');
-    let minesInput = this.minesInput = document.createElement('input');
+    let xInput = this.elements.xInput;
+    let yInput = this.elements.yInput;
+    let minesInput = this.elements.minesInput;
 
     let xInputLabel = document.createElement('div');
     let yInputLabel = document.createElement('div');
     let minesInputLabel = document.createElement('div');
 
-    controlls.className = 'control';
+    controls.className = 'control';
     resetBtn.className = 'reset-btn ctrl';
     resetBtn.innerHTML = 'Reset';
     xInput.className = 'x-in ctrl';
     xInput.type = 'number';
     xInput.value = 10;
+    xInput.min = 7;
+    xInput.addEventListener('change', (event) => {
+      minesInput.max = xInput.value * yInput.value - 1;
+    });
     yInput.className = 'y-in ctrl';
     yInput.type = 'number';
     yInput.value = 10;
+    yInput.min = 7;
+    yInput.addEventListener('change', (event) => {
+      minesInput.max = xInput.value * yInput.value - 1;
+    });
     minesInput.className = 'mines-in ctrl';
     minesInput.type = 'number';
     minesInput.value = 15;
+    minesInput.min = 1;
+    minesInput.max = xInput.value * yInput.value - 1;
 
     xInputLabel.className = 'x-in-label ctrl-label';
     yInputLabel.className = 'y-in-label ctrl-label';
@@ -137,11 +168,11 @@ class MineSweeper extends HTMLElement {
     
     resetBtn.addEventListener('click', (event) => { this.resetGame(); });
 
-    controlls.append(xInput, yInput, minesInput, resetBtn);
-    controlls.append(xInputLabel, yInputLabel, minesInputLabel);
+    controls.append(xInput, yInput, minesInput, resetBtn);
+    controls.append(xInputLabel, yInputLabel, minesInputLabel);
     
-    this.append(controlls);
-    controlls.append(...this.createSevenSegmentDisplays());
+    this.append(controls);
+    controls.append(...this.createSevenSegmentDisplays());
     this.updateSegmentDisplay();
   }
 
@@ -153,29 +184,17 @@ class MineSweeper extends HTMLElement {
     minesLeftSegment.className = 'segment-display-container mines-left';
     timePassedSegment.className = 'segment-display-container time-passed';
 
-    this.segmentDisplays = [
-      document.createElement('seven-segment-digit'), 
-      document.createElement('seven-segment-digit'), 
-      document.createElement('seven-segment-digit')
-    ];
-
-    this.timeSegmentDisplays = [
-      document.createElement('seven-segment-digit'),
-      document.createElement('seven-segment-digit'),
-      document.createElement('seven-segment-digit')
-    ];
-
-    this.segmentDisplays.forEach((segmentDisplay, index) => {
+    this.elements.segmentDisplays.forEach((segmentDisplay, index) => {
       segmentDisplay.className = `segment-digit segment-${index}`;
       minesLeftSegment.append(segmentDisplay);
     });
 
-    this.timeSegmentDisplays.forEach((segmentDisplay, index) => {
+    this.elements.timeSegmentDisplays.forEach((segmentDisplay, index) => {
       segmentDisplay.className =  `segment-digit segment-time-${index}`;
       timePassedSegment.append(segmentDisplay);
     });
 
-    setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
+    this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
 
     result.push(minesLeftSegment);
     result.push(timePassedSegment);
@@ -185,13 +204,14 @@ class MineSweeper extends HTMLElement {
 
   resetGame(){
     this.timeStarted = (new Date()).getTime();
-    this.xLength = parseInt(this.yInput.value);
-    this.yLength = parseInt(this.xInput.value);
-    this.mineCount = parseInt(this.minesInput.value);
+    this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
+    this.xLength = parseInt(this.elements.yInput.value);
+    this.yLength = parseInt(this.elements.xInput.value);
+    this.mineCount = parseInt(this.elements.minesInput.value);
     this.minesLeft = this.mineCount;
-    this.field.forEach((columns) => columns.forEach((value) => {
+    this.elements.field.forEach((columns) => columns.forEach((value) => {
       value.remove();
-      if(this.overlayMessage) this.overlayMessage.remove();
+      if(this.elements.overlayMessage) this.elements.overlayMessage.remove();
     }));
     this.updateSegmentDisplay();
     this.createBoard();
@@ -204,16 +224,16 @@ class MineSweeper extends HTMLElement {
     this.setAttribute('style', 
       `--x-length: ${this.xLength}; --y-length: ${this.yLength}; ${this.xOverflow ? this.marginOverflow : this.marginNoOverflow}`
     );
-    this.field = [...Array(this.xLength)].map(value => [...Array(this.yLength)]);
+    this.elements.field = [...Array(this.xLength)].map(value => [...Array(this.yLength)]);
 
     this.firstClick = false;
 
-    this.field.forEach((yField, xPos) => yField.forEach((value, yPos) => {
+    this.elements.field.forEach((yField, xPos) => yField.forEach((value, yPos) => {
       let field = document.createElement('div');
       field.className = `${xPos}-row ${yPos}-col field`;
       field.xPos = xPos;
       field.yPos = yPos;
-      this.field[xPos][yPos] = field;
+      this.elements.field[xPos][yPos] = field;
       field.addEventListener('click', (event) => {
         if(!this.firstClick){ 
           this.placeMines(xPos, yPos)
@@ -223,15 +243,15 @@ class MineSweeper extends HTMLElement {
           field.pressed = true;
           field.classList.add('pressed');
           let suroundingBombs = this.calculateSurroundingBombs(xPos, yPos);
-          field.innerHTML = field.bomb ? `<span>${field.bomb}</span>` : `<span>${suroundingBombs}</span>`;
+          field.innerHTML = field.bomb ? `<span>${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? ' ' : suroundingBombs}</span>`;
           if(suroundingBombs === 0){
             this.checkAdjecentForZero(xPos, yPos);
           }
           if(field.bomb){
             this.hitBomb()
           }
-        }
-        
+          if(this.checkVictory()) this.gameOver(true)
+        }        
       });
       field.addEventListener('contextmenu', (event) => {
         event.preventDefault();
@@ -269,14 +289,14 @@ class MineSweeper extends HTMLElement {
 
   updateSegmentDisplay(){
     let segmentString = this.minesLeft < 0 ? this.minesLeft.toFixed(0).padStart(3, ' ') : this.minesLeft.toFixed(0).padStart(3, '0');
-    this.segmentDisplays.forEach((display, index) => {
+    this.elements.segmentDisplays.forEach((display, index) => {
       display.setAttribute('digit', segmentString.charAt(index) == '-' ? '-1' : segmentString.charAt(index));
     });
   }
 
   updateTimeSegmentDisplay(){
     let timePassed = Math.floor((parseInt((new Date()).getTime()) - parseInt(this.timeStarted)) / 1000).toFixed(0).padStart(3, '0');
-    this.timeSegmentDisplays.forEach((display, index) => {
+    this.elements.timeSegmentDisplays.forEach((display, index) => {
       display.setAttribute('digit', parseInt(timePassed) > 999 ? '9' : timePassed.charAt(index))
     })
   }
@@ -291,9 +311,7 @@ class MineSweeper extends HTMLElement {
 
     ipcRenderer.on('resize-to-content-reply', (event, arg) => {
       let answer = JSON.parse(arg);
-
       this.xOverflow = answer.xOverflow;
-
       this.setAttribute('style', 
         `--x-length: ${this.xLength}; --y-length: ${this.yLength}; ${this.xOverflow ? this.marginOverflow : this.marginNoOverflow}`
       );

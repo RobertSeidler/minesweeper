@@ -9,7 +9,9 @@ seven-segment-digit {
 .seven-segment {
   position: relative;
   display: inline-block;
-  --color: green;
+  --color-active: green;
+  --color-inactive: green;
+  /* --color-inactive: rgb(0, 31, 0); */
   width: 9px;
   height: 18px;
   transform: scale(0.1)translate(-35px, -70px);
@@ -17,14 +19,43 @@ seven-segment-digit {
   margin-bottom: auto;
 }
 
+.segment {
+  opacity: 0.2;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.segment::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  box-shadow: 0px 0px 75px 5px var(--color-active); 
+  transition: opacity 0.5s ease-in-out;
+}
+
+.segment.active {
+  opacity: 1;
+  /* transition: opacity 0.5s; */
+}
+
+.segment.active::after {
+  opacity: 1;
+}
+
 .seven-segment .a {
   position: absolute;
   left: 5px;
   height: 0;
   width: 50px;
-  border-top: 15px solid var(--color);
+  border-top: 15px solid var(--color-inactive);
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
+}
+
+.seven-segment .a.active {
+  border-top: 15px solid var(--color-active);
 }
 
 .seven-segment .b {
@@ -33,9 +64,13 @@ seven-segment-digit {
   top: 5px;
   height: 50px;
   width: 0;
-  border-right: 15px solid var(--color);
+  border-right: 15px solid var(--color-inactive);
   border-top: 15px solid transparent;
   border-bottom: 15px solid transparent;
+}
+
+.seven-segment .b.active {
+  border-right: 15px solid var(--color-active);
 }
 
 .seven-segment .c {
@@ -44,9 +79,13 @@ seven-segment-digit {
   top: 90px;
   height: 50px;
   width: 0;
-  border-right: 15px solid var(--color);
+  border-right: 15px solid var(--color-inactive);
   border-top: 15px solid transparent;
   border-bottom: 15px solid transparent;
+}
+
+.seven-segment .c.active {
+  border-right: 15px solid var(--color-active);
 }
 
 .seven-segment .d {
@@ -55,9 +94,13 @@ seven-segment-digit {
   left: 5px;
   height: 0;
   width: 50px;
-  border-bottom: 15px solid var(--color);
+  border-bottom: 15px solid var(--color-inactive);
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
+}
+
+.seven-segment .d.active {
+  border-bottom: 15px solid var(--color-active);
 }
 
 .seven-segment .e {
@@ -66,9 +109,13 @@ seven-segment-digit {
   top: 90px;
   height: 50px;
   width: 0;
-  border-left: 15px solid var(--color);
+  border-left: 15px solid var(--color-inactive);
   border-top: 15px solid transparent;
   border-bottom: 15px solid transparent;
+}
+
+.seven-segment .e.active {
+  border-left: 15px solid var(--color-active);
 }
 
 .seven-segment .f {
@@ -77,9 +124,13 @@ seven-segment-digit {
   top: 5px;
   height: 50px;
   width: 0;
-  border-left: 15px solid var(--color);
+  border-left: 15px solid var(--color-inactive);
   border-top: 15px solid transparent;
   border-bottom: 15px solid transparent;
+}
+
+.seven-segment .f.active {
+  border-left: 15px solid var(--color-active);
 }
 
 .seven-segment .g {
@@ -91,15 +142,23 @@ seven-segment-digit {
 .g .bottom {
 height: 0;
 width: 65px;
-border-top: 7.5px solid var(--color);
+border-top: 7.5px solid var(--color-inactive);
 border-left: 7.5px solid transparent;
 border-right: 7.5px solid transparent;
 }
 
+.g.active .bottom {
+  border-top: 7.5px solid var(--color-active);
+}
+
 .g .top {
-height: 0;
-width: 65px;
-border-bottom: 7.5px solid var(--color);
-border-left: 7.5px solid transparent;
-border-right: 7.5px solid transparent;
+  height: 0;
+  width: 65px;
+  border-bottom: 7.5px solid var(--color-inactive);
+  border-left: 7.5px solid transparent;
+  border-right: 7.5px solid transparent;
+}
+
+.g.active .top {
+  border-bottom: 7.5px solid var(--color-active);
 }

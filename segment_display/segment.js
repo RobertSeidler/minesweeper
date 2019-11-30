@@ -7,6 +7,7 @@ class SevenSegmentDigit extends HTMLElement {
     super();
 
     this.digitId = 0;
+    this.allSegments = [];
   }
 
 
@@ -39,10 +40,13 @@ class SevenSegmentDigit extends HTMLElement {
 
     this.seg_g.append(this.seg_g_top, this.seg_g_bottom);
 
-    // this.append(this.seg_a, this.seg_b, this.seg_c, this.seg_d, this.seg_e, this.seg_f, this.seg_g);
+    this.allSegments = [this.seg_a, this.seg_b, this.seg_c, this.seg_d, this.seg_e, this.seg_f, this.seg_g];
+
+    this.container.append(...this.allSegments);
   }
 
   changeDisplay(){
+    this.allSegments.forEach(segment => segment.classList.remove('active'))
     let digit = this.digit;
     let result = [];
 
@@ -61,7 +65,7 @@ class SevenSegmentDigit extends HTMLElement {
       if(digit === 0 || digit == 2 || digit == 6 || digit == 8) result.push(this.seg_e);   
     }
 
-    return result;
+    result.forEach(segment => segment.classList.add('active'));
   }
 
   createSegmentContainer(){
@@ -75,10 +79,11 @@ class SevenSegmentDigit extends HTMLElement {
     // let digit = 0;
     this.digit = 0;  // digit == ' ' ? ' ' : parseInt(digit);
 
-    this.createSegments();
     this.createSegmentContainer();
+    this.createSegments();
     
-    this.container.append(...this.changeDisplay());
+    this.changeDisplay();
+    // this.container.append(...this.changeDisplay());
   }
 
   attributeChangedCallback(name, oldValue, newValue){
@@ -86,11 +91,12 @@ class SevenSegmentDigit extends HTMLElement {
       this.digit = newValue == ' ' ? ' ' : parseInt(newValue);
 
       if(this.container){
-        let oldSegments = this.container.querySelectorAll('div.segment');
-        for(let i = 0; i < oldSegments.length; i++){
-          oldSegments[i].remove();
-        }
-        this.container.append(...this.changeDisplay());
+        // let oldSegments = this.container.querySelectorAll('div.segment');
+        // for(let i = 0; i < oldSegments.length; i++){
+        //   oldSegments[i].remove();
+        // }
+        // this.container.append(...this.changeDisplay());
+        this.changeDisplay()
       }
     }
   }

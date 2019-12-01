@@ -49,7 +49,7 @@ class MineSweeper extends HTMLElement {
         document.createElement('seven-segment-digit'), 
         document.createElement('seven-segment-digit')
       ],
-    }
+    };
 
     this.dynamicStyles = {
       marginNoOverflow: 
@@ -59,7 +59,7 @@ class MineSweeper extends HTMLElement {
         '--margin-top: calc( -1 * calc(var(--x-length) * 2rem + (var(--x-length) + 1) * 1px) /2);',
       marginOverflow: 
         '--margin-top: 0px; top: 0px; --margin-left: 0px; left: 0px;',
-    }
+    };
   }
 
   calculateSurroundingBombs(xPos, yPos){
@@ -224,6 +224,68 @@ class MineSweeper extends HTMLElement {
     this.createBoard();
   }
 
+  fieldLeftClickHandler(field){
+    if(!this.firstClick){ 
+      this.placeMines(xPos, yPos)
+      this.firstClick = true;
+    };
+    if(!field.flag && !field.speculation){
+      field.pressed = true;
+      field.classList.add('pressed');
+      let suroundingBombs = this.calculateSurroundingBombs(xPos, yPos);
+      field.innerHTML = field.bomb ? `<span>${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? ' ' : suroundingBombs}</span>`;
+      if(suroundingBombs === 0){
+        this.checkAdjecentForZero(xPos, yPos);
+      }
+      if(field.bomb){
+        this.hitBomb()
+      }
+      if(this.checkVictory()) this.gameOver(true)
+    }
+  }
+
+  setRedFlag(field){
+    field.flag = true;
+    field.speculation = false;
+    this.minesLeft -= 1;
+    console.log(this.minesLeft);
+    requestAnimationFrame(() => this.updateSegmentDisplay());
+    field.classList.add('flagged');
+    field.classList.remove('speculation');
+    field.innerHTML = `<span>&#9873;</span>`;
+    if(this.checkVictory()) this.gameOver(true);
+  }
+
+  setBlueFlag(field){
+    field.flag = false;
+    field.speculation = true;
+    this.minesLeft += 1;
+    requestAnimationFrame(() => this.updateSegmentDisplay());
+    field.classList.remove('flagged');
+    field.classList.add('speculation');
+    field.innerHTML = `<span>&#9873;</span>`;
+  }
+
+  clearFlag(field){
+    field.flag = false;
+    field.speculation = false;
+    field.classList.remove('flagged');
+    field.classList.remove('speculation');
+    field.innerHTML = '';
+  }
+
+  fieldRightClickHander(field){
+    if(!field.pressed){
+      if(!field.flag && !field.speculation){
+        this.setRedFlag(field);
+      } else if (field.flag && !field.speculation) {
+        this.setBlueFlag(field);
+      } else {
+        this.clearFlag(field);
+      }
+    }
+  }
+
   createBoard(){
     requestAnimationFrame(
       () => (ipcRenderer.send('resize-to-content', JSON.stringify({x: this.clientWidth, y: this.clientHeight})))
@@ -242,53 +304,11 @@ class MineSweeper extends HTMLElement {
       field.yPos = yPos;
       this.elements.field[xPos][yPos] = field;
       field.addEventListener('click', (event) => {
-        if(!this.firstClick){ 
-          this.placeMines(xPos, yPos)
-          this.firstClick = true;
-        };
-        if(!field.flag){
-          field.pressed = true;
-          field.classList.add('pressed');
-          let suroundingBombs = this.calculateSurroundingBombs(xPos, yPos);
-          field.innerHTML = field.bomb ? `<span>${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? ' ' : suroundingBombs}</span>`;
-          if(suroundingBombs === 0){
-            this.checkAdjecentForZero(xPos, yPos);
-          }
-          if(field.bomb){
-            this.hitBomb()
-          }
-          if(this.checkVictory()) this.gameOver(true)
-        }        
+        this.fieldLeftClickHandler(field);
       });
       field.addEventListener('contextmenu', (event) => {
         event.preventDefault();
-        if(!field.pressed){
-          if(!field.flag && !field.speculation){
-            field.flag = true;
-            field.speculation = false;
-            this.minesLeft -= 1;
-            console.log(this.minesLeft);
-            requestAnimationFrame(() => this.updateSegmentDisplay());
-            field.classList.add('flagged');
-            field.classList.remove('speculation');
-            field.innerHTML = `<span>&#9873;</span>`;
-            if(this.checkVictory()) this.gameOver(true)
-          } else if (field.flag && !field.speculation) {
-            field.flag = false;
-            field.speculation = true;
-            this.minesLeft += 1;
-            requestAnimationFrame(() => this.updateSegmentDisplay());
-            field.classList.remove('flagged');
-            field.classList.add('speculation');
-            field.innerHTML = `<span>&#9873;</span>`;  
-          } else {
-            field.flag = false;
-            field.speculation = false;
-            field.classList.remove('flagged');
-            field.classList.remove('speculation');
-            field.innerHTML = '';
-          }
-        }        
+        this.fieldRightClickHander(field);
       })
       this.append(field);
     }));

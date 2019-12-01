@@ -104,7 +104,7 @@ class MineSweeper extends HTMLElement {
   checkVictory(){
     let victory = true;
 
-    this.elements.field.forEach((columns, xPos) => columns.forEach((field, yPos) => {
+    this.elements.field.forEach(columns => columns.forEach(field => {
       if(!field.bomb && field.flag) victory = false;
       if(field.bomb && field.pressed) victory = false;
       if(!field.bomb && !field.pressed) victory = false;
@@ -126,57 +126,93 @@ class MineSweeper extends HTMLElement {
       let suroundingBombs = this.calculateSurroundingBombs(xPos, yPos);
       field.pressed = true;
       field.classList.add('pressed');
-      field.innerHTML = field.bomb ? `<span style="color: black;">${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? ' ' : suroundingBombs}</span>`;
+      field.innerHTML = field.bomb ? 
+        `<span style="color: black;">${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? 
+          ' ' : suroundingBombs}</span>`;
     }));
     this.gameOver(false);
   }
 
-  createControlUI(){
+  createControlContainer(){
     let controls = document.createElement('div');
-    let resetBtn = document.createElement('button');
-    let xInput = this.elements.xInput;
-    let yInput = this.elements.yInput;
-    let minesInput = this.elements.minesInput;
-
-    let xInputLabel = document.createElement('div');
-    let yInputLabel = document.createElement('div');
-    let minesInputLabel = document.createElement('div');
-
     controls.className = 'control';
+    return controls;
+  }
+
+  createResetBtn(){
+    let resetBtn = document.createElement('button');
     resetBtn.className = 'reset-btn ctrl';
     resetBtn.innerHTML = 'Reset';
+    resetBtn.addEventListener('click', (event) => { this.resetGame(); });
+    return resetBtn;
+  }
+
+  createXInput(){
+    let xInput = this.elements.xInput;
     xInput.className = 'x-in ctrl';
     xInput.type = 'number';
     xInput.value = 10;
     xInput.min = 7;
-    xInput.addEventListener('change', (event) => {
-      minesInput.max = xInput.value * yInput.value - 1;
-    });
+    return xInput;
+  }
+  
+  createXInputLabel(){
+    let xInputLabel = document.createElement('div');
+    xInputLabel.className = 'x-in-label ctrl-label';
+    xInputLabel.innerHTML = '<span>Width:</span>';
+    return xInputLabel;
+  }
+
+  createYInput(){
+    let yInput = this.elements.yInput;
     yInput.className = 'y-in ctrl';
     yInput.type = 'number';
     yInput.value = 10;
     yInput.min = 7;
-    yInput.addEventListener('change', (event) => {
-      minesInput.max = xInput.value * yInput.value - 1;
-    });
+    return yInput;
+  }
+  
+  createYInputLabel(){
+    let yInputLabel = document.createElement('div');
+    yInputLabel.className = 'y-in-label ctrl-label';
+    yInputLabel.innerHTML = '<span>Height:</span>';
+    return yInputLabel;
+  }
+  
+  createMinesInput(){
+    let minesInput = this.elements.minesInput;
     minesInput.className = 'mines-in ctrl';
     minesInput.type = 'number';
     minesInput.value = 15;
     minesInput.min = 1;
-    minesInput.max = xInput.value * yInput.value - 1;
+    return minesInput;
+  }
 
-    xInputLabel.className = 'x-in-label ctrl-label';
-    yInputLabel.className = 'y-in-label ctrl-label';
+  createMinesInputLabel(){
+    let minesInputLabel = document.createElement('div');
     minesInputLabel.className = 'mines-in-label ctrl-label';
-
-    xInputLabel.innerHTML = '<span>Width:</span>';
-    yInputLabel.innerHTML = '<span>Height:</span>';
     minesInputLabel.innerHTML = '<span>Mines:</span>';
-    
-    resetBtn.addEventListener('click', (event) => { this.resetGame(); });
+    return minesInputLabel;
+  }
 
-    controls.append(xInput, yInput, minesInput, resetBtn);
-    controls.append(xInputLabel, yInputLabel, minesInputLabel);
+
+  createControlUI(){
+    let controls = this.createControlContainer();
+    let xInput = this.createXInput();
+    let yInput = this.createYInput();
+    let minesInput = this.createMinesInput();
+
+    xInput.addEventListener('change', (event) => {
+      minesInput.max = xInput.value * yInput.value - 1;
+    });
+    yInput.addEventListener('change', (event) => {
+      minesInput.max = xInput.value * yInput.value - 1;
+    });
+
+    minesInput.max = xInput.value * yInput.value - 1;
+ 
+    controls.append(xInput, yInput, minesInput, this.createResetBtn());
+    controls.append(this.createXInputLabel(), this.createYInputLabel(), this.createMinesInputLabel());
     
     this.append(controls);
     controls.append(...this.createSevenSegmentDisplays());
@@ -226,16 +262,16 @@ class MineSweeper extends HTMLElement {
 
   fieldLeftClickHandler(field){
     if(!this.firstClick){ 
-      this.placeMines(xPos, yPos)
+      this.placeMines(field.xPos, field.yPos)
       this.firstClick = true;
     };
     if(!field.flag && !field.speculation){
       field.pressed = true;
       field.classList.add('pressed');
-      let suroundingBombs = this.calculateSurroundingBombs(xPos, yPos);
+      let suroundingBombs = this.calculateSurroundingBombs(field.xPos, field.yPos);
       field.innerHTML = field.bomb ? `<span>${field.bomb}</span>` : `<span class="adj-${suroundingBombs}">${suroundingBombs === 0 ? ' ' : suroundingBombs}</span>`;
       if(suroundingBombs === 0){
-        this.checkAdjecentForZero(xPos, yPos);
+        this.checkAdjecentForZero(field.xPos, field.yPos);
       }
       if(field.bomb){
         this.hitBomb()

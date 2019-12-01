@@ -51,8 +51,15 @@ class MineSweeper extends HTMLElement {
       ],
     }
 
-    this.marginNoOverflow = '--margin-left: calc( -1 * calc(var(--y-length) * 2rem + (var(--y-length) + 1) * 1px) /2);';
-    this.marginOverflow = '--margin-left: 0px; left: 0px;';
+    this.dynamicStyles = {
+      marginNoOverflow: 
+        'top: 0%;' + 
+        'left: 50%;' + 
+        '--margin-left: calc( -1 * calc(var(--y-length) * 2rem + (var(--y-length) + 1) * 1px) /2);' + 
+        '--margin-top: calc( -1 * calc(var(--x-length) * 2rem + (var(--x-length) + 1) * 1px) /2);',
+      marginOverflow: 
+        '--margin-top: 0px; top: 0px; --margin-left: 0px; left: 0px;',
+    }
   }
 
   calculateSurroundingBombs(xPos, yPos){
@@ -68,8 +75,8 @@ class MineSweeper extends HTMLElement {
         let xMinePos = Math.floor(Math.random() * this.xLength);
         let yMinePos = Math.floor(Math.random() * this.yLength);
 
-        if(!(xPosClicked == xMinePos && yPosClicked == yMinePos) && this.elements.field[xMinePos][yMinePos].bomb != 'x') {
-          this.elements.field[xMinePos][yMinePos].bomb = '&#9728;'
+        if(!(xPosClicked == xMinePos && yPosClicked == yMinePos) && this.elements.field[xMinePos][yMinePos].bomb != '&#9728;') {
+          this.elements.field[xMinePos][yMinePos].bomb = '&#9728;';
           minePlaced = true;
         }
       }
@@ -108,7 +115,7 @@ class MineSweeper extends HTMLElement {
 
   gameOver(won){
     this.elements.overlayMessage.className = `overlay ${won ? 'won' : 'lost'}`;
-    this.elements.overlayMessage.innerHTML = won ? 'won' : 'lost';
+    this.elements.overlayMessage.innerHTML = won ? '<span class="end-emoji">&#10003;</span><br/>won' : '<span class="end-emoji">&#10040;</span><br/>lost'; 
     this.elements.overlayMessage.addEventListener('dblclick', (event) => { this.resetGame(); });
     clearInterval(this.timePassedInterval);
     this.append(this.elements.overlayMessage);
@@ -222,7 +229,7 @@ class MineSweeper extends HTMLElement {
       () => (ipcRenderer.send('resize-to-content', JSON.stringify({x: this.clientWidth, y: this.clientHeight})))
     );
     this.setAttribute('style', 
-      `--x-length: ${this.xLength}; --y-length: ${this.yLength}; ${this.xOverflow ? this.marginOverflow : this.marginNoOverflow}`
+      `--x-length: ${this.xLength}; --y-length: ${this.yLength}; ${this.xOverflow ? this.dynamicStyles.marginOverflow : this.dynamicStyles.marginNoOverflow}`
     );
     this.elements.field = [...Array(this.xLength)].map(value => [...Array(this.yLength)]);
 
@@ -313,7 +320,7 @@ class MineSweeper extends HTMLElement {
       let answer = JSON.parse(arg);
       this.xOverflow = answer.xOverflow;
       this.setAttribute('style', 
-        `--x-length: ${this.xLength}; --y-length: ${this.yLength}; ${this.xOverflow ? this.marginOverflow : this.marginNoOverflow}`
+        `--x-length: ${this.xLength}; --y-length: ${this.yLength}; ${this.xOverflow ? this.dynamicStyles.marginOverflow : this.dynamicStyles.marginNoOverflow}`
       );
     })
 

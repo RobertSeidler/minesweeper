@@ -11,7 +11,7 @@ function createWindow () {
     },
     useContentSize: true,
     center: true,
-    resizable: false,
+    resizable: true,
     maximizable: false,
     fullscreenable: false,
     title: 'Minesweeper',
@@ -23,7 +23,7 @@ function createWindow () {
     let screenSize = screen.getPrimaryDisplay().bounds;
     let {x: width, y: height} = JSON.parse(arg);
     let newWidth = width + 60;
-    let newHeight = height + 160;
+    let newHeight = height + 60;
 
     let widthOverflow = newWidth > screenSize.width;
     let heightOverflow = newHeight > screenSize.height;

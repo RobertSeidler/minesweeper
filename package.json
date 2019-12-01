@@ -4,7 +4,7 @@
   "description": "",
   "main": "electron_entry.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron . --no-sandbox",
     "build": "(if exist dist (rmdir dist)) && mkdir dist && electron-packager . Minesweeper --all --out=dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

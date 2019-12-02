@@ -202,10 +202,10 @@ class MineSweeper extends HTMLElement {
     let yInput = this.createYInput();
     let minesInput = this.createMinesInput();
 
-    xInput.addEventListener('change', (event) => {
+    xInput.addEventListener('change', () => {
       minesInput.max = xInput.value * yInput.value - 1;
     });
-    yInput.addEventListener('change', (event) => {
+    yInput.addEventListener('change', () => {
       minesInput.max = xInput.value * yInput.value - 1;
     });
 

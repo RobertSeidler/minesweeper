@@ -142,7 +142,11 @@ module.exports.defineElement = function(elementName, ipcRenderer){
       let resetBtn = document.createElement('button');
       resetBtn.className = 'reset-btn ctrl';
       resetBtn.innerHTML = 'Reset';
-      resetBtn.addEventListener('click', (event) => { this.resetGame(); });
+      resetBtn.addEventListener('click', (event) => { 
+        this.elements.xInput.value = 7;
+        this.elements.yInput.value = 7;
+        this.resetGame(); 
+      });
       return resetBtn;
     }
 
@@ -236,8 +240,6 @@ module.exports.defineElement = function(elementName, ipcRenderer){
         timePassedSegment.append(segmentDisplay);
       });
 
-      this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
-
       result.push(minesLeftSegment);
       result.push(timePassedSegment);
 
@@ -262,6 +264,7 @@ module.exports.defineElement = function(elementName, ipcRenderer){
     fieldLeftClickHandler(field){
       if(!this.firstClick){ 
         this.placeMines(field.xPos, field.yPos)
+        this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
         this.firstClick = true;
       };
       if(!field.flag && !field.speculation){

@@ -23,7 +23,7 @@ function createWindow () {
     let screenSize = screen.getPrimaryDisplay().bounds;
     let {x: width, y: height} = JSON.parse(arg);
     let newWidth = width + 60;
-    let newHeight = height + 60;
+    let newHeight = height + 80;
 
     let widthOverflow = newWidth > screenSize.width;
     let heightOverflow = newHeight > screenSize.height;
@@ -43,7 +43,7 @@ function createWindow () {
   global.HTMLElement = win.HTMLElement;
   
   // und lade die index.html der App.
-  win.loadFile('index.html')
+  win.loadFile('electron_index.html')
 
   let contents = win.webContents
   console.log(contents)

@@ -4,13 +4,17 @@
   "description": "",
   "main": "electron_entry.js",
   "scripts": {
-    "start": "electron . --no-sandbox",
-    "build": "(if exist dist (rmdir dist)) && mkdir dist && electron-packager . Minesweeper --all --out=dist",
+    "start": "electron .",
+    "clear_dist": "(if exist dist (rmdir /s /q dist)) && mkdir dist",
+    "build_electron": "electron-packager . Minesweeper --all --out=dist",
+    "build_browser": "browserify -t browserify-css browser_entry.js --standalone Minesweeper > dist/bundle.js && (robocopy public/ *.* dist/ /E) ^& exit 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Robert Seidler",
   "license": "ISC",
   "devDependencies": {
+    "browserify": "^16.5.0",
+    "browserify-css": "^0.15.0",
     "electron": "^7.1.2",
     "electron-packager": "^14.1.1"
   }

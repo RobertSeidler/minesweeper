@@ -143,7 +143,11 @@ class MineSweeper extends HTMLElement {
     let resetBtn = document.createElement('button');
     resetBtn.className = 'reset-btn ctrl';
     resetBtn.innerHTML = 'Reset';
-    resetBtn.addEventListener('click', (event) => { this.resetGame(); });
+    resetBtn.addEventListener('click', (event) => { 
+      this.elements.xInput.value = 7;
+      this.elements.yInput.value = 7;
+      this.resetGame(); 
+    });
     return resetBtn;
   }
 
@@ -237,7 +241,7 @@ class MineSweeper extends HTMLElement {
       timePassedSegment.append(segmentDisplay);
     });
 
-    this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
+    // this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
 
     result.push(minesLeftSegment);
     result.push(timePassedSegment);
@@ -247,7 +251,7 @@ class MineSweeper extends HTMLElement {
 
   resetGame(){
     this.timeStarted = (new Date()).getTime();
-    this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
+    // this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
     this.xLength = parseInt(this.elements.yInput.value);
     this.yLength = parseInt(this.elements.xInput.value);
     this.mineCount = parseInt(this.elements.minesInput.value);
@@ -262,7 +266,8 @@ class MineSweeper extends HTMLElement {
 
   fieldLeftClickHandler(field){
     if(!this.firstClick){ 
-      this.placeMines(field.xPos, field.yPos)
+      this.placeMines(field.xPos, field.yPos);
+      this.timePassedInterval = setInterval(this.updateTimeSegmentDisplay.bind(this), 1000);
       this.firstClick = true;
     };
     if(!field.flag && !field.speculation){
